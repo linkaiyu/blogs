@@ -1,0 +1,12 @@
+https://login.microsoftonline.com/15b9650e-e41d-4ee6-828b-a990e7547602/oauth2/v2.0/authorize?client_id=45d01eef-ab49-462d-838b-30aea918e1fb&response_type=id_token
+&redirect_uri=https%3A%2F%2Flocalhost%3A8080&response_mode=form_post&scope=openid&state=12345&nonce=678910
+
+https://login.microsoftonline.com/15b9650e-e41d-4ee6-828b-a990e7547602/oauth2/v2.0/authorize?client_id=45d01eef-ab49-462d-838b-30aea918e1fb&response_type=id_token
+&redirect_uri=https%3A%2F%2Flocalhost%3A8080%2F&response_mode=fragment&scope=openid&state=12345&nonce=678910
+
+use form-post
+https://login.microsoftonline.com/15b9650e-e41d-4ee6-828b-a990e7547602/oauth2/v2.0/authorize?client_id=45d01eef-ab49-462d-838b-30aea918e1fb&response_type=id_token
+&redirect_uri=http%3A%2F%2Flocalhost%3A7071%2Fapi%2Fget_ID&response_mode=form_post&scope=openid&state=12345&nonce=678910
+
+
+

@@ -1,0 +1,25 @@
+### Step 1: Authorization Request (Open this URL in browser manually)
+# Replace <tenant-id> and <client-id> before using
+# This step is manual — copy the URL and paste it in your browser
+
+# GET https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/authorize?
+# client_id=<your-client-id>
+# &response_type=code
+# &redirect_uri=https%3A%2F%2Foauth.pstmn.io%2Fv1%2Fcallback
+# &response_mode=query
+# &scope=openid profile email https://graph.microsoft.com/.default offline_access
+# &state=12345
+# &nonce=67890
+
+### Step 2: Token Request (Exchange code for tokens)
+# Replace <tenant-id>, <client-id>, <client-secret>, <redirect-uri>, and <authorization-code>
+
+POST https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=<your-client-id>
+&client_secret=<your-client-secret>
+&grant_type=authorization_code
+&code=<authorization-code>
+&redirect_uri=https%3A%2F%2Foauth.pstmn.io%2Fv1%2Fcallback
+&scope=openid profile email https://graph.microsoft.com/.default offline_access

@@ -1,0 +1,2 @@
+
+https://learn.microsoft.com/en-us/entra/msal/msal-authentication-flows
