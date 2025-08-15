@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — One‑Page Cheat Sheet</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--ink:#e5e7eb;--ink2:#cbd5e1;--accent:#60a5fa;--good:#34d399;--warn:#f59e0b;--bad:#f87171;--code:#0b1020;}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    .page{max-width:1100px;margin:28px auto;padding:0 16px}
+    header{margin-bottom:16px}
+    h1{font-size:1.9rem;line-height:1.2;margin:0 0 8px}
+    h2{font-size:1.25rem;margin:24px 0 8px;color:var(--ink)}
+    h3{font-size:1.1rem;margin:20px 0 6px;color:var(--ink)}
+    p,li{color:var(--ink2)}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:12px;padding:16px;margin:16px 0}
+    .grid{display:grid;gap:12px}
+    @media (min-width: 900px){.grid-2{grid-template-columns:1fr 1fr}}
+    code,kbd,pre{font-family:ui-monospace,SFMono-Regular,Consolas,Menlo,monospace}
+    pre{background:var(--code);border-radius:10px;padding:12px;overflow:auto;border:1px solid #1e293b}
+    code.inline{background:#0a0f1a;border:1px solid #132238;color:#e2e8f0;border-radius:6px;padding:0 4px}
+    table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid #1f2937;border-radius:10px;overflow:hidden}
+    th,td{padding:10px;border-bottom:1px solid #1f2937;text-align:left;vertical-align:top;color:var(--ink2)}
+    th{background:#0e1a2b;color:#cfe1ff}
+    .pill{display:inline-block;padding:.15rem .45rem;border-radius:999px;border:1px solid #334155;background:#0b1220;color:#cfe1ff}
+    .pill.good{border-color:#065f46;color:#a7f3d0}
+    .pill.warn{border-color:#78350f;color:#fde68a}
+    .pill.bad{border-color:#7f1d1d;color:#fecaca}
+    a{color:#93c5fd;text-decoration:none}
+    a:hover{text-decoration:underline}
+    .footnotes{font-size:.95rem}
+    .muted{color:#94a3b8}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — One‑Page Cheat Sheet</h1>
+      <p class="muted">How roles (<code class="inline">roles</code>) and scopes (<code class="inline">scp</code>) appear in tokens across flows, and how to configure app roles & authorization in ASP.NET Core.</p>
+    </header>
+
+    <section class="card">
+      <h2>Quick facts</h2>
+      <ul>
+        <li><strong>Delegated (user) tokens</strong> carry <code class="inline">scp</code> (scopes); <code class="inline">roles</code> appear only if the <em>API app</em> defines user roles and the user is assigned to them. <sup><a href="#ref-verify">[1]</a></sup></li>
+        <li><strong>Application (app-only) tokens</strong> from <em>Client Credentials</em> never have <code class="inline">scp</code>; they carry <code class="inline">roles</code> when the API app exposes <em>application</em> roles and the calling app is assigned. <sup><a href="#ref-verify">[1]</a>, <a href="#ref-cc-no-scp">[2]</a></sup></li>
+        <li>Define app roles on the <strong>API app registration</strong> (not the client app) and assign users/groups or applications via <strong>Enterprise applications</strong>. <sup><a href="#ref-add-roles">[3]</a></sup></li>
+        <li><strong>ID tokens</strong> are for the client; <strong>access tokens</strong> are for the API. Enforce <code class="inline">scp</code> (delegated) or <code class="inline">roles</code> (app-only) in the API. <sup><a href="#ref-verify">[1]</a>, <a href="#ref-id-claims">[4]</a></sup></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Token expectations per flow</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Flow</th>
+            <th>Subject</th>
+            <th>Access token carries</th>
+            <th>Where to define roles</th>
+            <th>Your API should enforce</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Authorization Code (incl. PKCE)</td>
+            <td>User</td>
+            <td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
+            <td>API app → App roles (Users/Groups)</td>
+            <td>Required scopes; optionally roles</td>
+          </tr>
+          <tr>
+            <td>Device Code</td>
+            <td>User</td>
+            <td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
+            <td>API app → App roles (Users/Groups)</td>
+            <td>Required scopes; optionally roles</td>
+          </tr>
+          <tr>
+            <td>On-Behalf-Of (OBO)</td>
+            <td>User</td>
+            <td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
+            <td>Downstream API app → App roles (Users/Groups)</td>
+            <td>Required scopes (and roles if used)</td>
+          </tr>
+          <tr>
+            <td>Client Credentials</td>
+            <td>Application</td>
+            <td><span class="pill">roles</span> only (no <code>scp</code>)</td>
+            <td>API app → App roles (Applications)</td>
+            <td>Required application roles</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted">Docs: Verify scopes & roles in protected APIs; client-credentials tokens omit <code>scp</code>. <sup><a href="#ref-verify">[1]</a>, <a href="#ref-cc-no-scp">[2]</a></sup></p>
+    </section>
+
+    <section class="card">
+      <h2>Entra ID configuration checklist</h2>
+      <ol>
+        <li><strong>Create / open</strong> your <em>API</em> app registration → <strong>App roles</strong> → <em>Create app role</em> for Users/Groups and/or Applications. <sup><a href="#ref-add-roles">[3]</a></sup></li>
+        <li><strong>Assign roles</strong> in <em>Enterprise applications → [Your API] → Users and groups</em> (for users) or to the calling <em>application’s service principal</em> (for app-only). <sup><a href="#ref-add-roles">[3]</a></sup></li>
+        <li><strong>Client (caller) requests</strong> tokens for your API: 
+          <code class="inline">api://&lt;API-CLIENT-ID&gt;/&lt;scope&gt;</code> (delegated) or 
+          <code class="inline">api://&lt;API-CLIENT-ID&gt;/.default</code> (app-only). <sup><a href="#ref-verify">[1]</a></sup>
+        </li>
+        <li><strong>Avoid</strong> emitting groups <em>as roles</em> when you rely on app roles (it hides app roles from the <code class="inline">roles</code> claim). <sup><a href="#ref-groups">[5]</a></sup></li>
+      </ol>
+    </section>
+
+    <section class="grid grid-2">
+      <div class="card">
+        <h2>Example: API app manifest (app roles)</h2>
+        <p>Defines one user role and one application role. Assign users/groups to the former, and assign calling apps to the latter.</p>
+<pre><code>{
+  "appRoles": [
+    {
+      "allowedMemberTypes": [ "User" ],
+      "description": "End users allowed to read data.",
+      "displayName": "Reader",
+      "id": "11111111-1111-1111-1111-111111111111",
+      "isEnabled": true,
+      "value": "Reader"
+    },
+    {
+      "allowedMemberTypes": [ "Application" ],
+      "description": "Daemon apps allowed to ingest data.",
+      "displayName": "Ingestor",
+      "id": "22222222-2222-2222-2222-222222222222",
+      "isEnabled": true,
+      "value": "Ingestor"
+    }
+  ]
+}
+</code></pre>
+        <p class="muted">Add via <em>App registrations → App roles</em> or manifest. <sup><a href="#ref-add-roles">[3]</a></sup></p>
+      </div>
+      <div class="card">
+        <h2>Example: Expose an API (scopes)</h2>
+        <p>For delegated access, define scopes under <em>Expose an API</em> and require them in your API.</p>
+<pre><code>{
+  "oauth2Permissions": [
+    {
+      "adminConsentDescription": "Allow the app to read items as the signed-in user.",
+      "adminConsentDisplayName": "Read items",
+      "id": "33333333-3333-3333-3333-333333333333",
+      "isEnabled": true,
+      "type": "User",
+      "userConsentDescription": "Read items you have access to.",
+      "userConsentDisplayName": "Read items",
+      "value": "Items.Read"
+    }
+  ]
+}
+</code></pre>
+        <p class="muted">The client requests <code class="inline">api://&lt;API-ID&gt;/Items.Read</code>. <sup><a href="#ref-verify">[1]</a></sup></p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>ASP.NET Core authorization snippets</h2>
+      <h3>1) Configure authentication for a protected API</h3>
+<pre><code class="language-csharp">// Program.cs (.NET 8 minimal sample)
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Identity.Web;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+
+// Optional: make sure role claim type is mapped correctly (v2 tokens use "roles")
+builder.Services.Configure&lt;JwtBearerOptions&gt;(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    options.TokenValidationParameters.RoleClaimType = "roles"; // default is fine, but explicit is clearer
+});
+
+builder.Services.AddAuthorization();
+
+var app = builder.Build();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+app.Run();
+</code></pre>
+      <p class="muted">See Microsoft guidance for configuring protected APIs. <sup><a href="#ref-api-config">[6]</a></sup></p>
+
+      <h3>2) Delegated calls (user): enforce scopes and optionally roles</h3>
+<pre><code class="language-csharp">using Microsoft.AspNetCore.Authorization;
+using Microsoft.Identity.Web;
+
+[Authorize]
+[RequiredScope("Items.Read")] // Enforce scope from Expose an API
+[ApiController]
+[Route("api/[controller]")]
+public class ItemsController : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get() =&gt; Ok(new [] { "a", "b" });
+
+    // If you also use user app roles on the API, you can require them:
+    [HttpGet("/admin")]
+    [Authorize(Roles = "Reader")] // roles claim must include "Reader"
+    public IActionResult AdminOnly() =&gt; Ok("ok");
+}
+</code></pre>
+      <p class="muted">Verify scopes for user calls; verify roles if you assign user roles on the API. <sup><a href="#ref-verify">[1]</a></sup></p>
+
+      <h3>3) App-only (daemon) calls: enforce application roles</h3>
+<pre><code class="language-csharp">using Microsoft.AspNetCore.Authorization;
+
+[ApiController]
+[Route("api/[controller]")]
+public class IngestController : ControllerBase
+{
+    // Client credentials tokens won't have an "scp" claim; require an application role instead
+    [HttpPost]
+    [Authorize(Roles = "Ingestor")] // roles claim must include "Ingestor"
+    public IActionResult Post([FromBody] object payload) =&gt; Ok();
+}
+</code></pre>
+      <p class="muted">Client credentials tokens contain <code>roles</code> (no <code>scp</code>) when the calling app is assigned to API application roles. <sup><a href="#ref-cc-no-scp">[2]</a>, <a href="#ref-add-roles">[3]</a></sup></p>
+    </section>
+
+    <section class="card">
+      <h2>Testing tips</h2>
+      <ul>
+        <li><strong>User flow:</strong> Acquire token for <code class="inline">api://&lt;API-ID&gt;/Items.Read</code>; access token will carry <code class="inline">scp</code> (and <code class="inline">roles</code> if applicable). <sup><a href="#ref-verify">[1]</a></sup></li>
+        <li><strong>App-only flow:</strong> Acquire token with scope <code class="inline">api://&lt;API-ID&gt;/.default</code>; verify access token has <code class="inline">roles</code> and omits <code class="inline">scp</code>. <sup><a href="#ref-cc-no-scp">[2]</a></sup></li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Troubleshooting</h2>
+      <ul>
+        <li><strong>No roles in access token (delegated):</strong> Ensure roles are defined on the <em>API</em> app and the user is assigned to them; or rely on scopes only. <sup><a href="#ref-add-roles">[3]</a>, <a href="#ref-verify">[1]</a></sup></li>
+        <li><strong>No roles in app-only token:</strong> Confirm the API exposes <em>application</em> roles and the calling app’s service principal is assigned in Enterprise apps. <sup><a href="#ref-add-roles">[3]</a></sup></li>
+        <li><strong>Groups emitted as roles hides app roles:</strong> Disable <em>emit_as_roles</em> for groups if you need app roles in the <code class="inline">roles</code> claim. <sup><a href="#ref-groups">[5]</a></sup></li>
+      </ul>
+    </section>
+
+    <section class="card footnotes">
+      <h2>References</h2>
+      <ol>
+        <li id="ref-verify">Protected web API: <em>Verify scopes and app roles</em> — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" target="_blank" rel="noopener">link</a></li>
+        <li id="ref-cc-no-scp">Client credentials tokens: <em>scp absent; use app roles in roles claim</em> — Microsoft Q&A. <a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" target="_blank" rel="noopener">link</a></li>
+        <li id="ref-add-roles">Add app roles to your application and receive them in the token — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" target="_blank" rel="noopener">link</a></li>
+        <li id="ref-id-claims">ID token claims reference — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/id-token-claims-reference" target="_blank" rel="noopener">link</a></li>
+        <li id="ref-groups">Configure group claims and app roles in tokens — Microsoft Learn (see interactions & token behaviors). <a href="https://learn.microsoft.com/en-us/security/zero-trust/develop/configure-tokens-group-claims-app-roles" target="_blank" rel="noopener">link</a></li>
+        <li id="ref-api-config">Protected web API: Code configuration — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-app-configuration" target="_blank" rel="noopener">link</a></li>
+      </ol>
+    </section>
+
+    <footer class="muted" style="margin:16px 0 32px">© 2025 — One‑page cheat sheet generated for quick reference.</footer>
+  </div>
+</body>
+</html>
