@@ -1,11 +1,12 @@
 
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — One‑Page Cheat Sheet (with Section References)</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — One‑Page Cheat Sheet (with Section References)</title>
+<style>
     :root{--bg:#0f172a;--card:#111827;--ink:#e5e7eb;--ink2:#cbd5e1;--accent:#60a5fa;--good:#34d399;--warn:#f59e0b;--bad:#f87171;--code:#0b1020;}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
     .page{max-width:1100px;margin:28px auto;padding:0 16px}
@@ -36,108 +37,104 @@
   </style>
 </head>
 <body>
-  <div class="page">
-    <header>
-      <h1>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — One‑Page Cheat Sheet</h1>
-      <p class="muted">Each section includes <em>document references</em> to the Microsoft Learn/Q&A source(s) it draws from.</p>
-    </header>
-
-    <section class="card" id="quick-facts">
-      <h2>Quick facts</h2>
-      <ul>
-        <li><strong>Delegated (user) tokens</strong> carry <code class="inline">scp</code> (scopes); <code class="inline">roles</code> appear only if the <em>API app</em> defines user roles and the user is assigned to them.</li>
-        <li><strong>Application (app-only) tokens</strong> from <em>Client Credentials</em> never have <code class="inline">scp</code>; they carry <code class="inline">roles</code> when the API app exposes <em>application</em> roles and the calling app is assigned.</li>
-        <li>Define app roles on the <strong>API app registration</strong> (not the client app) and assign users/groups or applications via <strong>Enterprise applications</strong>.</li>
-        <li><strong>ID tokens</strong> are for the client; <strong>access tokens</strong> are for the API. Enforce <code class="inline">scp</code> (delegated) or <code class="inline">roles</code> (app-only) in the API.</li>
-      </ul>
-      <div class="sources">
-        <h4>Sources for this section</h4>
-        <ul>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" target="_blank" rel="noopener">Protected web API: Verify scopes & app roles</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" target="_blank" rel="noopener">Q&A: Client credentials tokens missing scp (by design)</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" target="_blank" rel="noopener">Add app roles & receive them in the token</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/id-token-claims-reference" target="_blank" rel="noopener">ID token claims reference</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="card" id="matrix">
-      <h2>Token expectations per flow</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Flow</th>
-            <th>Subject</th>
-            <th>Access token carries</th>
-            <th>Where to define roles</th>
-            <th>Your API should enforce</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Authorization Code (incl. PKCE)</td>
-            <td>User</td>
-            <td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
-            <td>API app → App roles (Users/Groups)</td>
-            <td>Required scopes; optionally roles</td>
-          </tr>
-          <tr>
-            <td>Device Code</td>
-            <td>User</td>
-            <td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
-            <td>API app → App roles (Users/Groups)</td>
-            <td>Required scopes; optionally roles</td>
-          </tr>
-          <tr>
-            <td>On-Behalf-Of (OBO)</td>
-            <td>User</td>
-            <td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
-            <td>Downstream API app → App roles (Users/Groups)</td>
-            <td>Required scopes (and roles if used)</td>
-          </tr>
-          <tr>
-            <td>Client Credentials</td>
-            <td>Application</td>
-            <td><span class="pill">roles</span> only (no <code>scp</code>)</td>
-            <td>API app → App roles (Applications)</td>
-            <td>Required application roles</td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="sources">
-        <h4>Sources for this section</h4>
-        <ul>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" target="_blank" rel="noopener">Verify scopes & app roles</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" target="_blank" rel="noopener">Client credentials: no scp claim</a></li>
-          <li><a href="https://docs.azure.cn/en-us/entra/identity-platform/access-token-claims-reference" target="_blank" rel="noopener">Access token claims reference</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="card" id="checklist">
-      <h2>Entra ID configuration checklist</h2>
-      <ol>
-        <li><strong>Create / open</strong> your <em>API</em> app registration → <strong>App roles</strong> → <em>Create app role</em> for Users/Groups and/or Applications.</li>
-        <li><strong>Assign roles</strong> in <em>Enterprise applications → [Your API] → Users and groups</em> (for users) or to the calling <em>application’s service principal</em> (for app-only).</li>
-        <li><strong>Client (caller) requests</strong> tokens for your API: 
+<div class="page">
+<header>
+<h1>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — One‑Page Cheat Sheet</h1>
+<p class="muted">Each section includes <em>document references</em> to the Microsoft Learn/Q&amp;A source(s) it draws from.</p>
+</header>
+<section class="card" id="quick-facts">
+<h2>Quick facts</h2>
+<ul>
+<li><strong>Delegated (user) tokens</strong> carry <code class="inline">scp</code> (scopes); <code class="inline">roles</code> appear only if the <em>API app</em> defines user roles and the user is assigned to them.</li>
+<li><strong>Application (app-only) tokens</strong> from <em>Client Credentials</em> never have <code class="inline">scp</code>; they carry <code class="inline">roles</code> when the API app exposes <em>application</em> roles and the calling app is assigned.</li>
+<li>Define app roles on the <strong>API app registration</strong> (not the client app) and assign users/groups or applications via <strong>Enterprise applications</strong>.</li>
+<li><strong>ID tokens</strong> are for the client; <strong>access tokens</strong> are for the API. Enforce <code class="inline">scp</code> (delegated) or <code class="inline">roles</code> (app-only) in the API.</li>
+</ul>
+<div class="sources">
+<h4>Sources for this section</h4>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" rel="noopener" target="_blank">Protected web API: Verify scopes &amp; app roles</a></li>
+<li><a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" rel="noopener" target="_blank">Q&amp;A: Client credentials tokens missing scp (by design)</a></li>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" rel="noopener" target="_blank">Add app roles &amp; receive them in the token</a></li>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/id-token-claims-reference" rel="noopener" target="_blank">ID token claims reference</a></li>
+</ul>
+</div>
+</section>
+<section class="card" id="matrix">
+<h2>Token expectations per flow</h2>
+<table>
+<thead>
+<tr>
+<th>Flow</th>
+<th>Subject</th>
+<th>Access token carries</th>
+<th>Where to define roles</th>
+<th>Your API should enforce</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Authorization Code (incl. PKCE)</td>
+<td>User</td>
+<td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
+<td>API app → App roles (Users/Groups)</td>
+<td>Required scopes; optionally roles</td>
+</tr>
+<tr>
+<td>Device Code</td>
+<td>User</td>
+<td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
+<td>API app → App roles (Users/Groups)</td>
+<td>Required scopes; optionally roles</td>
+</tr>
+<tr>
+<td>On-Behalf-Of (OBO)</td>
+<td>User</td>
+<td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
+<td>Downstream API app → App roles (Users/Groups)</td>
+<td>Required scopes (and roles if used)</td>
+</tr>
+<tr>
+<td>Client Credentials</td>
+<td>Application</td>
+<td><span class="pill">roles</span> only (no <code>scp</code>)</td>
+<td>API app → App roles (Applications)</td>
+<td>Required application roles</td>
+</tr>
+</tbody>
+</table>
+<div class="sources">
+<h4>Sources for this section</h4>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" rel="noopener" target="_blank">Verify scopes &amp; app roles</a></li>
+<li><a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" rel="noopener" target="_blank">Client credentials: no scp claim</a></li>
+<li><a href="https://docs.azure.cn/en-us/entra/identity-platform/access-token-claims-reference" rel="noopener" target="_blank">Access token claims reference</a></li>
+</ul>
+</div>
+</section>
+<section class="card" id="checklist">
+<h2>Entra ID configuration checklist</h2>
+<ol>
+<li><strong>Create / open</strong> your <em>API</em> app registration → <strong>App roles</strong> → <em>Create app role</em> for Users/Groups and/or Applications.</li>
+<li><strong>Assign roles</strong> in <em>Enterprise applications → [Your API] → Users and groups</em> (for users) or to the calling <em>application’s service principal</em> (for app-only).</li>
+<li><strong>Client (caller) requests</strong> tokens for your API: 
           <code class="inline">api://&lt;API-CLIENT-ID&gt;/&lt;scope&gt;</code> (delegated) or 
           <code class="inline">api://&lt;API-CLIENT-ID&gt;/.default</code> (app-only).</li>
-        <li><strong>Avoid</strong> emitting groups <em>as roles</em> when you rely on app roles (it hides app roles from the <code class="inline">roles</code> claim).</li>
-      </ol>
-      <div class="sources">
-        <h4>Sources for this section</h4>
-        <ul>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" target="_blank" rel="noopener">Add app roles & receive them in the token</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" target="_blank" rel="noopener">Verify scopes & app roles</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/security/zero-trust/develop/configure-tokens-group-claims-app-roles" target="_blank" rel="noopener">Configure group claims & app roles (emit_as_roles behavior)</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="grid grid-2" id="examples">
-      <div class="card">
-        <h2>Example: API app manifest (app roles)</h2>
-        <p>Defines one user role and one application role. Assign users/groups to the former, and assign calling apps to the latter.</p>
+<li><strong>Avoid</strong> emitting groups <em>as roles</em> when you rely on app roles (it hides app roles from the <code class="inline">roles</code> claim).</li>
+</ol>
+<div class="sources">
+<h4>Sources for this section</h4>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" rel="noopener" target="_blank">Add app roles &amp; receive them in the token</a></li>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" rel="noopener" target="_blank">Verify scopes &amp; app roles</a></li>
+<li><a href="https://learn.microsoft.com/en-us/security/zero-trust/develop/configure-tokens-group-claims-app-roles" rel="noopener" target="_blank">Configure group claims &amp; app roles (emit_as_roles behavior)</a></li>
+</ul>
+</div>
+</section>
+<section class="grid grid-2" id="examples">
+<div class="card">
+<h2>Example: API app manifest (app roles)</h2>
+<p>Defines one user role and one application role. Assign users/groups to the former, and assign calling apps to the latter.</p>
 <pre><code>{
   "appRoles": [
     {
@@ -159,16 +156,16 @@
   ]
 }
 </code></pre>
-        <div class="sources">
-          <h4>Sources for this section</h4>
-          <ul>
-            <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" target="_blank" rel="noopener">Add app roles (manifest & UI)</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="card">
-        <h2>Example: Expose an API (scopes)</h2>
-        <p>For delegated access, define scopes under <em>Expose an API</em> and require them in your API.</p>
+<div class="sources">
+<h4>Sources for this section</h4>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" rel="noopener" target="_blank">Add app roles (manifest &amp; UI)</a></li>
+</ul>
+</div>
+</div>
+<div class="card">
+<h2>Example: Expose an API (scopes)</h2>
+<p>For delegated access, define scopes under <em>Expose an API</em> and require them in your API.</p>
 <pre><code>{
   "oauth2Permissions": [
     {
@@ -184,18 +181,17 @@
   ]
 }
 </code></pre>
-        <div class="sources">
-          <h4>Sources for this section</h4>
-          <ul>
-            <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" target="_blank" rel="noopener">Verify scopes & app roles</a></li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="card" id="aspnet-core">
-      <h2>ASP.NET Core authorization snippets</h2>
-      <h3>1) Configure authentication for a protected API</h3>
+<div class="sources">
+<h4>Sources for this section</h4>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" rel="noopener" target="_blank">Verify scopes &amp; app roles</a></li>
+</ul>
+</div>
+</div>
+</section>
+<section class="card" id="aspnet-core">
+<h2>ASP.NET Core authorization snippets</h2>
+<h3>1) Configure authentication for a protected API</h3>
 <pre><code>// Program.cs (.NET 8 minimal sample)
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
@@ -207,7 +203,7 @@ builder.Services
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 
 // Optional: ensure role claim type is mapped correctly (v2 tokens use "roles")
-builder.Services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+builder.Services.Configure<jwtbeareroptions>(JwtBearerDefaults.AuthenticationScheme, options =&gt;
 {
     options.TokenValidationParameters.RoleClaimType = "roles"; // explicit
 });
@@ -220,9 +216,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.Run();
-</code></pre>
-
-      <h3>2) Delegated calls (user): enforce scopes and optionally roles</h3>
+</jwtbeareroptions></code></pre>
+<h3>2) Delegated calls (user): enforce scopes and optionally roles</h3>
 <pre><code>using Microsoft.AspNetCore.Authorization;
 using Microsoft.Identity.Web;
 
@@ -233,16 +228,15 @@ using Microsoft.Identity.Web;
 public class ItemsController : ControllerBase
 {
     [HttpGet]
-    public IActionResult Get() => Ok(new [] { "a", "b" });
+    public IActionResult Get() =&gt; Ok(new [] { "a", "b" });
 
     // If you also use user app roles on the API, you can require them:
     [HttpGet("/admin")]
     [Authorize(Roles = "Reader")] // roles claim must include "Reader"
-    public IActionResult AdminOnly() => Ok("ok");
+    public IActionResult AdminOnly() =&gt; Ok("ok");
 }
 </code></pre>
-
-      <h3>3) App-only (daemon) calls: enforce application roles</h3>
+<h3>3) App-only (daemon) calls: enforce application roles</h3>
 <pre><code>using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
@@ -252,65 +246,60 @@ public class IngestController : ControllerBase
     // Client credentials tokens won't have an "scp" claim; require an application role instead
     [HttpPost]
     [Authorize(Roles = "Ingestor")] // roles claim must include "Ingestor"
-    public IActionResult Post([FromBody] object payload) => Ok();
+    public IActionResult Post([FromBody] object payload) =&gt; Ok();
 }
 </code></pre>
-
-      <div class="sources">
-        <h4>Sources for this section</h4>
-        <ul>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-app-configuration" target="_blank" rel="noopener">Protected web API: Code configuration</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" target="_blank" rel="noopener">Verify scopes & app roles</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" target="_blank" rel="noopener">Client credentials: roles only, no scp</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="card" id="testing">
-      <h2>Testing tips</h2>
-      <ul>
-        <li><strong>User flow:</strong> Acquire token for <code class="inline">api://&lt;API-ID&gt;/Items.Read</code>; access token will carry <code class="inline">scp</code> (and <code class="inline">roles</code> if applicable).</li>
-        <li><strong>App-only flow:</strong> Acquire token with scope <code class="inline">api://&lt;API-ID&gt;/.default</code>; verify access token has <code class="inline">roles</code> and omits <code class="inline">scp</code>.</li>
-      </ul>
-      <div class="sources">
-        <h4>Sources for this section</h4>
-        <ul>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" target="_blank" rel="noopener">Verify scopes & app roles</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" target="_blank" rel="noopener">Client credentials token behavior</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="card" id="troubleshooting">
-      <h2>Troubleshooting</h2>
-      <ul>
-        <li><strong>No roles in access token (delegated):</strong> Ensure roles are defined on the <em>API</em> app and the user is assigned to them; or rely on scopes only.</li>
-        <li><strong>No roles in app-only token:</strong> Confirm the API exposes <em>application</em> roles and the calling app’s service principal is assigned in Enterprise apps.</li>
-        <li><strong>Groups emitted as roles hides app roles:</strong> Disable <em>emit_as_roles</em> for groups if you need app roles in the <code class="inline">roles</code> claim.</li>
-      </ul>
-      <div class="sources">
-        <h4>Sources for this section</h4>
-        <ul>
-          <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" target="_blank" rel="noopener">Add app roles</a></li>
-          <li><a href="https://learn.microsoft.com/en-us/security/zero-trust/develop/configure-tokens-group-claims-app-roles" target="_blank" rel="noopener">Group claims & app roles interactions</a></li>
-        </ul>
-      </div>
-    </section>
-
-    <section class="card footnotes" id="all-refs">
-      <h2>All references</h2>
-      <ol>
-        <li>Protected web API: <em>Verify scopes and app roles</em> — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" target="_blank" rel="noopener">link</a></li>
-        <li>Client credentials tokens: <em>scp absent; use app roles</em> — Microsoft Q&A. <a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" target="_blank" rel="noopener">link</a></li>
-        <li>Add app roles to your application and receive them in the token — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" target="_blank" rel="noopener">link</a></li>
-        <li>ID token claims reference — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/id-token-claims-reference" target="_blank" rel="noopener">link</a></li>
-        <li>Configure group claims and app roles in tokens — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/security/zero-trust/develop/configure-tokens-group-claims-app-roles" target="_blank" rel="noopener">link</a></li>
-        <li>Protected web API: Code configuration — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-app-configuration" target="_blank" rel="noopener">link</a></li>
-        <li>Access token claims reference — Microsoft Docs (CN mirror). <a href="https://docs.azure.cn/en-us/entra/identity-platform/access-token-claims-reference" target="_blank" rel="noopener">link</a></li>
-      </ol>
-    </section>
-
-    <footer class="muted" style="margin:16px 0 32px">© 2025 — One‑page cheat sheet with per‑section references.</footer>
-  </div>
+<div class="sources">
+<h4>Sources for this section</h4>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-app-configuration" rel="noopener" target="_blank">Protected web API: Code configuration</a></li>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" rel="noopener" target="_blank">Verify scopes &amp; app roles</a></li>
+<li><a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" rel="noopener" target="_blank">Client credentials: roles only, no scp</a></li>
+</ul>
+</div>
+</section>
+<section class="card" id="testing">
+<h2>Testing tips</h2>
+<ul>
+<li><strong>User flow:</strong> Acquire token for <code class="inline">api://&lt;API-ID&gt;/Items.Read</code>; access token will carry <code class="inline">scp</code> (and <code class="inline">roles</code> if applicable).</li>
+<li><strong>App-only flow:</strong> Acquire token with scope <code class="inline">api://&lt;API-ID&gt;/.default</code>; verify access token has <code class="inline">roles</code> and omits <code class="inline">scp</code>.</li>
+</ul>
+<div class="sources">
+<h4>Sources for this section</h4>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" rel="noopener" target="_blank">Verify scopes &amp; app roles</a></li>
+<li><a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" rel="noopener" target="_blank">Client credentials token behavior</a></li>
+</ul>
+</div>
+</section>
+<section class="card" id="troubleshooting">
+<h2>Troubleshooting</h2>
+<ul>
+<li><strong>No roles in access token (delegated):</strong> Ensure roles are defined on the <em>API</em> app and the user is assigned to them; or rely on scopes only.</li>
+<li><strong>No roles in app-only token:</strong> Confirm the API exposes <em>application</em> roles and the calling app’s service principal is assigned in Enterprise apps.</li>
+<li><strong>Groups emitted as roles hides app roles:</strong> Disable <em>emit_as_roles</em> for groups if you need app roles in the <code class="inline">roles</code> claim.</li>
+</ul>
+<div class="sources">
+<h4>Sources for this section</h4>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" rel="noopener" target="_blank">Add app roles</a></li>
+<li><a href="https://learn.microsoft.com/en-us/security/zero-trust/develop/configure-tokens-group-claims-app-roles" rel="noopener" target="_blank">Group claims &amp; app roles interactions</a></li>
+</ul>
+</div>
+</section>
+<section class="card footnotes" id="all-refs">
+<h2>All references</h2>
+<ol>
+<li>Protected web API: <em>Verify scopes and app roles</em> — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" rel="noopener" target="_blank">link</a></li>
+<li>Client credentials tokens: <em>scp absent; use app roles</em> — Microsoft Q&amp;A. <a href="https://learn.microsoft.com/en-us/answers/questions/2237097/azure-ad-access-token-is-missing-scope-or-roles-cl" rel="noopener" target="_blank">link</a></li>
+<li>Add app roles to your application and receive them in the token — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" rel="noopener" target="_blank">link</a></li>
+<li>ID token claims reference — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/id-token-claims-reference" rel="noopener" target="_blank">link</a></li>
+<li>Configure group claims and app roles in tokens — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/security/zero-trust/develop/configure-tokens-group-claims-app-roles" rel="noopener" target="_blank">link</a></li>
+<li>Protected web API: Code configuration — Microsoft Learn. <a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-app-configuration" rel="noopener" target="_blank">link</a></li>
+<li>Access token claims reference — Microsoft Docs (CN mirror). <a href="https://docs.azure.cn/en-us/entra/identity-platform/access-token-claims-reference" rel="noopener" target="_blank">link</a></li>
+</ol>
+</section>
+<footer class="muted" style="margin:16px 0 32px">© 2025 — One‑page cheat sheet with per‑section references.</footer>
+</div>
 </body>
 </html>
