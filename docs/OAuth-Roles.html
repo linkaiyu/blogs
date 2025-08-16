@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — One‑Page Cheat Sheet (with Section References)</title>
+<title>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — Cheat Sheet (with Section References)</title>
 <style>
     :root{--bg:#0f172a;--card:#111827;--ink:#e5e7eb;--ink2:#cbd5e1;--accent:#60a5fa;--good:#34d399;--warn:#f59e0b;--bad:#f87171;--code:#0b1020;}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
@@ -112,6 +112,65 @@
 </ul>
 </div>
 </section>
+<section class="card" id="key-insight">
+<h2>Key Insight: Delegated flows differ in how the client obtains a token, not in how Entra ID populates claims</h2>
+<p>For <strong>Authorization Code</strong>, <strong>Device Code</strong>, and <strong>On‑Behalf‑Of</strong> flows, the client obtains the user-delegated token via different mechanisms (interactive, device-assisted, or middle-tier exchange). However, once Microsoft Entra ID issues an <em>access token for your API</em>, the <strong>claim semantics are the same</strong>:</p>
+<ul>
+<li><code>scp</code> lists the <em>delegated scopes</em> granted to the client on behalf of the user.</li>
+<li><code>roles</code> appears if the user has <em>app roles</em> defined on the API and assigned (direct or via group).</li>
+<li>This behavior is consistent across the three delegated flows; the difference is <em>only</em> how the token is acquired.</li>
+</ul>
+<h3>Diagram: Different acquisition paths → Same claims in the API token</h3>
+<svg aria-label="Diagram showing three delegated flows feeding a common access token and claims evaluation" role="img" viewbox="0 0 980 360" width="100%">
+<defs>
+<style>
+        .box{fill:#0b1220;stroke:#1f2937;stroke-width:1.2}
+        .label{fill:#e5e7eb;font: 12px/1.2 ui-monospace, SFMono-Regular, Consolas}
+        .title{fill:#cfe1ff;font: 13.5px/1.2 system-ui,Segoe UI,Roboto}
+        .arrow{stroke:#60a5fa;stroke-width:2;marker-end:url(#arrow)}
+      </style>
+<marker id="arrow" markerheight="7" markerwidth="10" orient="auto" refx="10" refy="3.5">
+<polygon fill="#60a5fa" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+<!-- Column boxes: Auth Code, Device Code, OBO -->
+<rect class="box" height="80" rx="10" width="270" x="20" y="30"></rect>
+<text class="title" x="35" y="55">Authorization Code (interactive)</text>
+<text class="label" x="35" y="75">User signs in in browser</text>
+<text class="label" x="35" y="92">Client gets code → exchanges for token</text>
+<rect class="box" height="80" rx="10" width="270" x="350" y="30"></rect>
+<text class="title" x="365" y="55">Device Code</text>
+<text class="label" x="365" y="75">User enters device code on another device</text>
+<text class="label" x="365" y="92">Client polls → gets token</text>
+<rect class="box" height="80" rx="10" width="270" x="680" y="30"></rect>
+<text class="title" x="695" y="55">On‑Behalf‑Of (OBO)</text>
+<text class="label" x="695" y="75">Middle tier trades user token</text>
+<text class="label" x="695" y="92">for downstream API token</text>
+<!-- Common access token box -->
+<rect class="box" height="80" rx="10" width="620" x="180" y="150"></rect>
+<text class="title" x="195" y="175">Access token for API (delegated)</text>
+<text class="label" x="195" y="195">Claims: scp = delegated scopes; roles = user app roles (if assigned)</text>
+<!-- API evaluation box -->
+<rect class="box" height="70" rx="10" width="420" x="280" y="260"></rect>
+<text class="title" x="295" y="285">API evaluates claims</text>
+<text class="label" x="295" y="305">Delegated: check <scp> via RequiredScope; optionally check roles</scp></text>
+<!-- Arrows from sources to token -->
+<line class="arrow" x1="290" x2="300" y1="110" y2="150"></line>
+<line class="arrow" x1="485" x2="490" y1="110" y2="150"></line>
+<line class="arrow" x1="840" x2="780" y1="110" y2="150"></line>
+<!-- Arrow from token to evaluation -->
+<line class="arrow" x1="490" x2="490" y1="230" y2="260"></line>
+</svg>
+<div class="sources">
+<h4>Sources for this section</h4>
+<ul>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-verification-scope-app-roles" rel="noopener" target="_blank">Protected web API: Verify scopes &amp; app roles</a></li>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/scenario-protected-web-api-app-configuration" rel="noopener" target="_blank">Protected web API: Code configuration</a></li>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/v2-permissions-and-consent" rel="noopener" target="_blank">Permissions &amp; consent (scopes/delegated)</a></li>
+</ul>
+</div>
+</section>
+
 <section class="card" id="checklist">
 <h2>Entra ID configuration checklist</h2>
 <ol>
