@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — Cheat Sheet (with Section References)</title> 
+<title>OAuth 2.0 Flows × Role Claims in Microsoft Entra ID — One‑Page Cheat Sheet (with Section References)</title>
 <style>
     :root{--bg:#0f172a;--card:#111827;--ink:#e5e7eb;--ink2:#cbd5e1;--accent:#60a5fa;--good:#34d399;--warn:#f59e0b;--bad:#f87171;--code:#0b1020;}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
@@ -59,7 +59,14 @@
 <li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/id-token-claims-reference" rel="noopener" target="_blank">ID token claims reference</a></li>
 </ul>
 </div>
-</section>
+</section><section id="rbac-summary"><h2>RBAC Elements in Microsoft Entra ID</h2><p>This section summarizes key elements used in Role-Based Access Control (RBAC) within Microsoft Entra ID, including Role, Scope, Permission, User Groups, and Security Groups. These elements work together to define how access is granted and enforced in applications and APIs.</p>
+<table border="1" cellpadding="6" cellspacing="0" id="rbac-elements-table">
+<thead>
+<tr><th>Element</th><th>What it is</th><th>Use case</th><th>Token behavior</th><th>Configuration link</th></tr>
+</thead>
+<tbody><tr><td>Role</td><td>A named permission set defined in an app registration (App Roles) or a built-in directory role (like Global Admin).</td><td>Application roles: control what a user or app can do in a specific API. Directory roles: control what a user can do in Entra ID itself.</td><td>Appears in the <code>roles</code> claim when assigned.</td><td><a href="https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps" rel="noopener" target="_blank">Configure</a></td></tr><tr><td>Scope</td><td>A string representing a delegated permission defined by an API (e.g., <code>Items.Read</code>).</td><td>Fine-grained access control for delegated (user) calls to your API; requested by client apps.</td><td>Appears in the <code>scp</code> claim in access tokens.</td><td><a href="https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-configure-app-expose-web-apis" rel="noopener" target="_blank">Configure</a></td></tr><tr><td>Permission</td><td><strong>Delegated permission</strong> = scope granted to an app acting on behalf of a user. <strong>Application permission</strong> = app role granted to an app acting as itself (daemon).</td><td>Delegated: web/mobile apps calling APIs for a signed-in user. Application: daemon/background services.</td><td>Delegated → <code>scp</code>. Application → <code>roles</code>.</td><td><a href="https://learn.microsoft.com/en-us/entra/identity-platform/v2-permissions-and-consent" rel="noopener" target="_blank">Configure</a></td></tr><tr><td>User Groups</td><td>A collection of users (and optionally devices) in Entra ID.</td><td>Assign app roles or CA policies to many users at once; drive group-based role assignments to apps.</td><td>If group claims are configured, token can include <code>groups</code> (IDs). If the group is assigned to an app role, user inherits that role → <code>roles</code>.</td><td><a href="https://learn.microsoft.com/en-us/security/zero-trust/develop/configure-tokens-group-claims-app-roles" rel="noopener" target="_blank">Configure</a></td></tr><tr><td>Security Groups</td><td>A type of group used for access control (as opposed to M365 groups for collaboration).</td><td>Assign application roles to security groups for RBAC; use in CA or resource access.</td><td>Can appear in <code>groups</code> (if configured). If assigned to an app role, results in user’s <code>roles</code> claim containing that role.</td><td><a href="https://learn.microsoft.com/en-us/entra/identity/users/groups-create-azure-portal" rel="noopener" target="_blank">Configure</a></td></tr></tbody>
+</table>
+<p>Diagram placeholder: User → Group → Role → Token claims (`roles`, `scp`, `groups`).</p><p>Sources: Microsoft Learn - App roles, scopes, permissions, and group claims configuration.</p></section>
 <section class="card" id="matrix">
 <h2>Token expectations per flow</h2>
 <table>
@@ -70,7 +77,7 @@
 <th>Access token carries</th>
 <th>Where to define roles</th>
 <th>Your API should enforce</th>
-</tr>
+<th>Configuration Link</th></tr>
 </thead>
 <tbody>
 <tr>
@@ -79,28 +86,28 @@
 <td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
 <td>API app → App roles (Users/Groups)</td>
 <td>Required scopes; optionally roles</td>
-</tr>
+<td><a href="#" target="_blank">Configure</a></td></tr>
 <tr>
 <td>Device Code</td>
 <td>User</td>
 <td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
 <td>API app → App roles (Users/Groups)</td>
 <td>Required scopes; optionally roles</td>
-</tr>
+<td><a href="#" target="_blank">Configure</a></td></tr>
 <tr>
 <td>On-Behalf-Of (OBO)</td>
 <td>User</td>
 <td><span class="pill">scp</span>; <span class="pill">roles</span> if user-to-API role assigned</td>
 <td>Downstream API app → App roles (Users/Groups)</td>
 <td>Required scopes (and roles if used)</td>
-</tr>
+<td><a href="#" target="_blank">Configure</a></td></tr>
 <tr>
 <td>Client Credentials</td>
 <td>Application</td>
 <td><span class="pill">roles</span> only (no <code>scp</code>)</td>
 <td>API app → App roles (Applications)</td>
 <td>Required application roles</td>
-</tr>
+<td><a href="#" target="_blank">Configure</a></td></tr>
 </tbody>
 </table>
 <div class="sources">
@@ -170,7 +177,6 @@
 </ul>
 </div>
 </section>
-
 <section class="card" id="checklist">
 <h2>Entra ID configuration checklist</h2>
 <ol>
@@ -358,7 +364,7 @@ public class IngestController : ControllerBase
 <li>Access token claims reference — Microsoft Docs (CN mirror). <a href="https://docs.azure.cn/en-us/entra/identity-platform/access-token-claims-reference" rel="noopener" target="_blank">link</a></li>
 </ol>
 </section>
-<footer class="muted" style="margin:16px 0 32px">© 2025 — One‑page cheat sheet with per‑section references.</footer>
+<footer class="muted" style="margin:16px 0 32px">© 2025 — cheat sheet with per‑section references.</footer>
 </div>
 </body>
 </html>
