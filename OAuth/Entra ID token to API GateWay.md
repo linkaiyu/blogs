@@ -1,4 +1,4 @@
-# Accept the Entra access token directly at the AWS edge(recommended if you already have the token)
+## Accept the Entra access token directly at the AWS edge(recommended if you already have the token)
 You make API Gateway (HTTP API) or Application Load Balancer (ALB) validate Entra‑issued JWTs:
 
 # Register & expose your API in Entra ID
