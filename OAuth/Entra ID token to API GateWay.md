@@ -5,11 +5,11 @@ You make API Gateway (HTTP API) or Application Load Balancer (ALB) validate Entr
 
     Create an App Registration for the API; 
 
-    under Expose an API, set the Application ID URI (e.g., api://{clientId} or a custom URI) and define scopes (e.g., Todo.Read, Todo.Write).
+    under Expose an API, set the Application ID URI (e.g., api://{clientId} or a custom URI)
+    define scopes (e.g., Todo.Read, Todo.Write).
 
     Clients (Copilot agent) request tokens for that audience and include required scopes.
-
-    Your API will later enforce aud and scp/roles. [How to con...rosoft ...], [Tutorial:...y platform], [Access tok...y platform]
+    Your API will later enforce aud and scp/roles. 
 
  ## API Gateway HTTP API with a JWT Authorizer
     Configure a JWT authorizer with:
